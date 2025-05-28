@@ -27,7 +27,7 @@ monitor = {
 fps = 10.0
 
 # File names
-jogo_alvo = "Dungeons.exe"
+jogo_alvo = "Blasphemous.exe"
 timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
 output_file = f"video_original_{timestamp}.avi"
 compressed_file = f"video_comprimido_{timestamp}.mp4"
@@ -216,18 +216,36 @@ if not frames_brutos:
 # --- 3. Compressão do Vídeo ---
 if os.path.exists(output_file):
     try:
-        subprocess.run([
+        # Comando FFmpeg melhorado
+        cmd = [
             "ffmpeg",
+            "-y",  # Sobrescrever arquivo existente sem perguntar
             "-i", output_file,
-            "-crf", "28",
-            "-preset", "ultrafast",
+            "-c:v", "libx264",  # Codec de vídeo
+            "-crf", "28",  # Qualidade (0-51, menor é melhor)
+            "-preset", "fast",  # Balanço entre velocidade/compressão
+            "-pix_fmt", "yuv420p",  # Formato de pixel compatível
+            "-movflags", "+faststart",  # Para streaming
             compressed_file
-        ], check=True)
+        ]
+        
+        # Executa e captura output para debug
+        result = subprocess.run(cmd, check=True, 
+                              stdout=subprocess.PIPE, 
+                              stderr=subprocess.PIPE,
+                              text=True)
+        
         print(f"✅ Vídeo comprimido: {compressed_file}")
+        print(f"Tamanho original: {os.path.getsize(output_file)/1024/1024:.2f}MB")
+        print(f"Tamanho comprimido: {os.path.getsize(compressed_file)/1024/1024:.2f}MB")
+        
+    except subprocess.CalledProcessError as e:
+        print(f"❌ Falha na compressão (code {e.returncode}):")
+        print(e.stderr)
     except Exception as e:
-        print(f"❌ Falha na compressão: {str(e)}")
+        print(f"❌ Erro inesperado: {str(e)}")
 else:
-    print(f"⚠️ Arquivo {output_file} não encontrado para compressão")
+    print(f"⚠️ Arquivo {output_file} não encontrado")
 
 # --- 4. Pré-Processamento para ML ---
 try:
