@@ -1,0 +1,3 @@
+Abra uma pasta no Vscode coloque todos esses arquivos dentro da pasta respeitando seus nomes, adicione uma pasta chama .streamlit e dentro dela
+crie um arquivo nome de secrets.toml, dentro desse arquivo digite a seguinte coisa GEMINI_API_KEY="AIzaSyBtZwoQQ7hniBmEz6_ejeJ-fHaQf5ysejs. Após
+isso você deve abrir um terminal e digitar python start_app.py
