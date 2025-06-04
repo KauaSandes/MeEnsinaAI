@@ -1,0 +1,9 @@
+streamlit
+google-generativeai
+mss
+opencv-python-headless
+numpy
+requests
+Pillow
+tenacity
+toml
