@@ -7,3 +7,5 @@ requests
 Pillow
 tenacity
 toml
+pywin32
+pygetwindow
