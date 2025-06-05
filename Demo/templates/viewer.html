@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MeEnsinaAI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo-section">
+                <div class="logo-container">
+                    <img src="{{ url_for('static', filename='logo.png') }}" alt="MeEnsinaAI Logo" class="main-logo">
+                    <div class="logo-text">
+                        <span class="title">MeEnsinaAI</span>
+                        <span class="subtitle">Análise de Gameplay</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-title">SÍNTESES</div>
+            <div id="sinteseList" class="file-list">
+                <!-- Lista de sínteses será carregada aqui -->
+            </div>
+
+            <div class="section-title">ANÁLISES DETALHADAS</div>
+            <div id="analiseList" class="file-list">
+                <!-- Lista de análises será carregada aqui -->
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="search-bar">
+                <input type="text" placeholder="Procurar dicas...">
+            </div>
+
+            <div class="welcome-card">
+                <h1>Bem-vindo ao MeEnsinaAI Hub</h1>
+                <p style="color: var(--text-secondary); margin: 16px 0;">
+                    Domine sua gameplay com dicas e estratégias personalizadas para Counter-Strike 2 e Street Fighter.
+                    Selecione uma análise no menu lateral para começar.
+                </p>
+                <div style="margin-top: 16px;">
+                    <span class="tip-category cs2">
+                        <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2L4 9v12h16V9l-8-7zm0 16c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/>
+                        </svg>
+                        Counter-Strike 2
+                    </span>
+                    <span class="tip-category sf6">
+                        <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M13.5 5.5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM9.8 8.9L7 23h2.1l1.8-8 2.1 2v6h2v-7.5l-2.1-2 .6-3C14.8 12 16.8 13 19 13v-2c-1.9 0-3.5-1-4.3-2.4l-1-1.6c-.4-.6-1-1-1.7-1-.3 0-.5.1-.8.1L6 8.3V13h2V9.6l1.8-.7"/>
+                        </svg>
+                        Street Fighter 6
+                    </span>
+                </div>
+            </div>
+
+            <div id="tipContent" class="markdown-content">
+                <!-- Tips will be loaded here -->
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Configuração do marked para formatar o conteúdo
+        marked.setOptions({
+            gfm: true,
+            breaks: true
+        });
+
+        // Função para criar item de arquivo
+        function createFileItem(file) {
+            console.log('Criando item de arquivo:', file.filename);
+            const fileName = file.filename.split('_')[0];
+            
+            return `
+                <div class="file-item" onclick="loadFileContent('${file.filename}')">
+                    <div class="file-icon">${file.game_icon}</div>
+                    <div class="file-info">
+                        <div class="file-name">${fileName}</div>
+                        <div class="file-date">${new Date(file.date).toLocaleDateString('pt-BR')}</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Carregar conteúdo do arquivo
+        async function loadFileContent(filename) {
+            console.log('Carregando arquivo:', filename);
+            
+            try {
+                const response = await fetch('/api/files');
+                if (!response.ok) {
+                    throw new Error('Erro ao carregar arquivo');
+                }
+
+                const data = await response.json();
+                console.log('Dados recebidos:', data);
+                
+                const allFiles = [...(data.sinteses || []), ...(data.analises || [])];
+                console.log('Total de arquivos:', allFiles.length);
+                
+                const file = allFiles.find(f => f.filename === filename);
+                console.log('Arquivo encontrado:', file ? 'Sim' : 'Não');
+
+                if (file && file.content) {
+                    console.log('Preparando para renderizar conteúdo...');
+                    
+                    // Não esconde mais o welcome card, apenas ajusta o espaçamento
+                    const welcomeCard = document.querySelector('.welcome-card');
+                    if (welcomeCard) {
+                        welcomeCard.style.marginBottom = '32px';
+                    }
+
+                    const tipContent = document.getElementById('tipContent');
+                    if (tipContent) {
+                        // Renderiza o conteúdo
+                        const content = marked.parse(file.content);
+                        
+                        // Adiciona a classe do jogo e renderiza
+                        tipContent.className = `markdown-content ${file.game_type.toLowerCase()}`;
+                        tipContent.innerHTML = content;
+                        tipContent.style.display = 'block';
+
+                        // Highlight code blocks
+                        document.querySelectorAll('pre code').forEach((block) => {
+                            hljs.highlightBlock(block);
+                        });
+                        
+                        console.log('Conteúdo renderizado com sucesso');
+                    } else {
+                        console.error('Elemento tipContent não encontrado');
+                    }
+                } else {
+                    console.error('Arquivo não encontrado ou sem conteúdo');
+                }
+            } catch (error) {
+                console.error('Erro ao carregar conteúdo do arquivo:', error);
+            }
+        }
+
+        // Carregar lista de arquivos
+        async function loadFileList() {
+            console.log('Iniciando carregamento da lista de arquivos...');
+            
+            try {
+                const response = await fetch('/api/files');
+                if (!response.ok) {
+                    throw new Error('Erro ao carregar arquivos');
+                }
+                
+                const data = await response.json();
+                console.log('Dados recebidos:', data);
+
+                // Atualiza lista de sínteses
+                const sinteseList = document.getElementById('sinteseList');
+                if (data.sinteses && sinteseList) {
+                    console.log('Atualizando lista de sínteses...');
+                    sinteseList.innerHTML = data.sinteses.map(file => createFileItem(file)).join('');
+                }
+
+                // Atualiza lista de análises
+                const analiseList = document.getElementById('analiseList');
+                if (data.analises && analiseList) {
+                    console.log('Atualizando lista de análises...');
+                    analiseList.innerHTML = data.analises.map(file => createFileItem(file)).join('');
+                }
+                
+                console.log('Lista de arquivos carregada com sucesso');
+            } catch (error) {
+                console.error('Erro ao carregar lista de arquivos:', error);
+            }
+        }
+
+        // Carregar lista inicial de arquivos quando o DOM estiver pronto
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('DOM carregado, iniciando aplicação...');
+            loadFileList();
+        });
+    </script>
+</body>
+</html> 
