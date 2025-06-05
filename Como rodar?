@@ -8,7 +8,7 @@
 arquivos)
 
 5- Dentro da pasta ".streamlit" crie o arquivo "secrets.toml", nesse arquivo deverá estar contido uma chave API do gemini ecrita exata-
-da seguinte maneira GEMINI_API_KEY="AIzaSyD5XmzJP_pXCXFoVV-PcP_KW99WHiTn7xo" (caso necessário crie uma nova chave e insira no local certo)
+da seguinte maneira GEMINI_API_KEY="AIzaSyDs_TzRjUr-f3zNZOgtg1H7rFyFY7BOHTk" (caso necessário crie uma nova chave e insira no local certo)
 
 6- Por último abra um terminal e execute o comando python start_app.py, ou se preferir der run diretamente no start_app.py (isso automati-
 camente te levará para o site quando o processo for finalizado. Se tudo estiver ocorrendo corretamente apenas aguarde)
