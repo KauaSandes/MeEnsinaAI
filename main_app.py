@@ -11,7 +11,7 @@ DB_PATH = Path(__file__).parent / "users.db"
 # Mapeamento de jogos para executáveis padrão
 GAME_EXECUTABLES = {
     "Counter-Strike 2": "cs2.exe",
-    "Street Fighter 6": "StreetFighter6.exe"
+    "Street Fighter 5": "StreetFighter5.exe"
 }
 
 def init_db():
@@ -126,10 +126,10 @@ def show_game_selection():
             st.rerun()
 
     with col2:
-        if st.button("Street Fighter 6", use_container_width=True):
+        if st.button("Street Fighter 5", use_container_width=True):
             st.session_state.game_selected = True
-            st.session_state.current_game = "Street Fighter 6"
-            st.session_state.game_exe = GAME_EXECUTABLES["Street Fighter 6"]
+            st.session_state.current_game = "Street Fighter 5"
+            st.session_state.game_exe = GAME_EXECUTABLES["Street Fighter 5"]
             st.session_state.analysis_started = False
             st.rerun()
 
@@ -147,9 +147,9 @@ def show_game_selection():
         - Economia e compra de armas
         """)
 
-    with st.expander("Street Fighter 6"):
+    with st.expander("Street Fighter 5"):
         st.write("""
-        Street Fighter 6 é um jogo de luta competitivo. 
+        Street Fighter 5 é um jogo de luta competitivo. 
         A análise focará em:
         - Combos e sequências
         - Defesa e bloqueio
