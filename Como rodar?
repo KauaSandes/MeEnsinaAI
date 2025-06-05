@@ -8,4 +8,7 @@ da seguinte maneira GEMINI_API_KEY="AIzaSyD5XmzJP_pXCXFoVV-PcP_KW99WHiTn7xo" (ca
 6- Por último abra um terminal e execute o comando python start_app.py, ou se preferir der run diretamente no start_app.py (isso automati-
 camente te levará para o site quando o processo for finalizado. Se tudo estiver ocorrendo corretamente apenas aguarde)
 
+OBS: durante o uso controlado do site serão geradas pastas/arquivos como ".venv", "users.db" e "__pycache__", isso está dentro da normali-
+dade, não modifique esses arquivos sem necessidade
+
 Muito obrigado pela paciência e pela atenção.
