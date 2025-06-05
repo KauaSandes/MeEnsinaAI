@@ -1,14 +1,22 @@
 1- Crie uma nova pasta na área de trabalho
+
 2- Abra o Vscode ou o Cursor
+
 3- Abra a pasta e comece a upar os arquivos listados de maneira organizada, respeitando seus nomes e deixando todos no "mesmo nível"
+
 4- Adicone uma segunda pasta nomeada de ".streamlit" dentro da que foi criada anteriormente (ela deve estar no mesmo nível que os demais
 arquivos)
+
 5- Dentro da pasta ".streamlit" crie o arquivo "secrets.toml", nesse arquivo deverá estar contido uma chave API do gemini ecrita exata-
 da seguinte maneira GEMINI_API_KEY="AIzaSyD5XmzJP_pXCXFoVV-PcP_KW99WHiTn7xo" (caso necessário crie uma nova chave e insira no local certo)
+
 6- Por último abra um terminal e execute o comando python start_app.py, ou se preferir der run diretamente no start_app.py (isso automati-
 camente te levará para o site quando o processo for finalizado. Se tudo estiver ocorrendo corretamente apenas aguarde)
 
+
+
 OBS: durante o uso controlado do site serão geradas pastas/arquivos como ".venv", "users.db" e "__pycache__", isso está dentro da normali-
 dade, não modifique esses arquivos sem necessidade
+
 
 Muito obrigado pela paciência e pela atenção.
