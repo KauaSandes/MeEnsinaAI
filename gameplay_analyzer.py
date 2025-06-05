@@ -89,7 +89,7 @@ GAME_PROMPTS = {
     - Forneça uma sugestão específica de correção
     - Se possível, sugira um workshop map ou exercício específico para melhorar este aspecto""",
 
-    "Street Fighter 6": """Você é um analista profissional de Street Fighter 6 especializado em coaching. 
+    "Street Fighter 5": """Você é um analista profissional de Street Fighter 5 especializado em coaching. 
     Analise este frame e forneça feedback técnico e específico sobre:
     
     1. Identificação:
@@ -350,8 +350,7 @@ Data: {datetime.now().strftime('%d/%m/%Y %H:%M')}
 
 {synthesis}
 
----
-Análise gerada por Claude-4 com base nos dados do InternVL"""
+"""
             
             return formatted_synthesis
         else:
