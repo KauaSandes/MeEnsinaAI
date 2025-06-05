@@ -6,6 +6,7 @@ import google.generativeai as genai
 import os
 import json
 import toml
+from datetime import datetime
 
 # --- Configuração da API Gemini ---
 if "GEMINI_API_KEY" in st.secrets:
@@ -582,48 +583,70 @@ def show_exe_input_screen():
 
 # --- Nova tela para iniciar a análise ---
 def show_start_analysis_screen():
-    st.title("Inicie sua Análise de Gameplay")
-    st.write(f"Jogo selecionado: **{st.session_state.current_game}**")
-    st.write(f"Executável do jogo: **{st.session_state.game_exe_name}**")
-
-    st.subheader("Instruções:")
-    st.write("""
-    1.  **Abra o jogo** (`""" + st.session_state.game_exe_name + """`) em **tela cheia** ou maximizado.
-    2.  Certifique-se de que o jogo está visível na sua tela principal.
-    3.  Clique no botão "Iniciar Análise de Gameplay" abaixo.
+    st.title("Análise de Gameplay")
+    st.markdown("---")
+    
+    st.subheader(f"Jogo selecionado: {st.session_state.current_game}")
+    st.write(f"Executável: {st.session_state.game_exe_name}")
+    
+    st.info("""
+    Instruções:
+    1. Abra o jogo em tela cheia
+    2. Certifique-se de que a janela do jogo está visível
+    3. Clique no botão abaixo para iniciar a gravação
     """)
-
-    # Exibir o prompt gerado (opcional, para depuração/visualização)
-    if st.session_state.gameplay_analysis_prompt:
-        with st.expander("Ver prompt de análise gerado (avançado)"):
-            st.text_area("Prompt:", value=st.session_state.gameplay_analysis_prompt, height=150, disabled=True)
-            st.caption("Este prompt será usado pela IA para analisar sua gameplay.")
-
-    if st.button("Iniciar Análise de Gameplay", type="primary"):
-        if not st.session_state.game_exe_name or st.session_state.game_exe_name == "N/A":
-            st.error("Por favor, informe um executável válido para iniciar a análise.")
-            return # Impede de prosseguir sem executável
-
-        with st.spinner("Iniciando gravação e análise de gameplay... Por favor, jogue por alguns segundos."):
-            # Chama a função principal de análise do gameplay_analyzer.py
-            report = run_gameplay_analysis(
-                jogo_alvo=st.session_state.game_exe_name,
-                gameplay_prompt=st.session_state.gameplay_analysis_prompt,
-                game_name=st.session_state.current_game
-            )
-            st.session_state.analysis_report = report
-            st.session_state.analysis_started = True # Marca que a análise foi concluída
-            st.rerun()
-            
-    if st.button("Voltar para inserir outro executável"):
-        st.session_state.exe_input_received = False
-        st.session_state.game_exe_name = ""
-        st.session_state.suggested_exe_from_ai = ""
-        st.rerun()
-
-    if st.button("Sair"):
-        st.session_state.clear()
-        st.experimental_rerun()
+    
+    # Expansor para visualização do prompt
+    with st.expander("Ver prompt de análise (Avançado)"):
+        st.code(st.session_state.gameplay_analysis_prompt)
+    
+    # Inicializa o estado de gravação se não existir
+    if 'is_recording' not in st.session_state:
+        st.session_state.is_recording = False
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        if not st.session_state.is_recording:
+            if st.button("Começar Gravação", type="primary"):
+                if not st.session_state.game_exe_name:
+                    st.error("Nome do executável não encontrado. Por favor, selecione outro jogo.")
+                    return
+                    
+                st.session_state.is_recording = True
+                st.rerun()
+    
+    with col2:
+        if st.session_state.is_recording:
+            if st.button("Interromper Gravação", type="secondary"):
+                st.session_state.is_recording = False
+                st.rerun()
+    
+    if st.session_state.is_recording:
+        with st.spinner("Gravando gameplay..."):
+            try:
+                result = run_gameplay_analysis(
+                    st.session_state.game_exe_name,
+                    st.session_state.gameplay_analysis_prompt,
+                    st.session_state.current_game
+                )
+                
+                if result.get('success'):
+                    st.session_state.analysis_report = result
+                    st.session_state.analysis_started = True
+                    st.session_state.is_recording = False
+                    st.rerun()
+                else:
+                    st.error(f"Erro na análise: {result.get('message', 'Erro desconhecido')}")
+                    st.session_state.is_recording = False
+                    if st.button("Tentar novamente"):
+                        st.rerun()
+                    
+            except Exception as e:
+                st.error(f"Erro ao executar análise: {str(e)}")
+                st.session_state.is_recording = False
+                if st.button("Tentar novamente"):
+                    st.rerun()
 
 
 # --- Nova tela para exibir os resultados da análise ---
@@ -635,21 +658,39 @@ def show_analysis_results_screen():
     st.write(f"Executável analisado: {st.session_state.game_exe_name}")
     
     if st.session_state.analysis_report:
-        st.markdown(st.session_state.analysis_report)
+        # Verifica se o relatório é um dicionário com a chave 'report'
+        if isinstance(st.session_state.analysis_report, dict) and 'report' in st.session_state.analysis_report:
+            st.markdown(st.session_state.analysis_report['report'])
+            report_text = st.session_state.analysis_report['report']
+        else:
+            st.markdown(st.session_state.analysis_report)
+            report_text = st.session_state.analysis_report
+            
+        # Adiciona botão para baixar o relatório
+        st.download_button(
+            label="Baixar Relatório",
+            data=report_text,
+            file_name=f"analise_{st.session_state.current_game.replace(' ', '_')}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.md",
+            mime="text/markdown"
+        )
     else:
         st.warning("Nenhum relatório de análise disponível. Algo pode ter dado errado durante a gravação ou processamento.")
         st.info("Verifique os logs no terminal para mais detalhes.")
         
     st.markdown("---")
     
-    if st.button("Fazer nova análise para este jogo"):
-        st.session_state.analysis_started = False
-        st.session_state.analysis_report = ""
-        st.rerun()
-        
-    if st.button("Escolher outro jogo"):
-        st.session_state.clear()
-        st.rerun()
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        if st.button("Fazer nova análise para este jogo"):
+            st.session_state.analysis_started = False
+            st.session_state.analysis_report = ""
+            st.rerun()
+    
+    with col2:
+        if st.button("Escolher outro jogo"):
+            st.session_state.clear()
+            st.rerun()
 
 def show_prompt_editing_screen():
     st.title("Edição do Prompt de Análise")
