@@ -1,0 +1,8 @@
+requests
+opencv-python
+numpy
+mss
+psutil
+customtkinter
+pandas
+tenacity
